@@ -1,4 +1,0 @@
-[docker]
-#nk-kubemaster ansible_host=162.70.42.69 ansible_user=root
-#nk-kubeworker2 ansible_host=162.70.42.244 ansible_user=root
-Cory-TestVM ansible_host=162.70.42.190 ansible_user=root
