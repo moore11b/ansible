@@ -1,0 +1,38 @@
+- hosts: all
+  #Number of hosts to run for each batch without will run the whole set in parallel
+  serial: 5  
+  tasks:
+    #Run Yum Updates equivalent of running 'yum -y update'
+    - name: Yum Updates
+      yum: 
+        name: '*'
+        state: latest
+      register: updates
+
+    - name: Updates Installed
+      debug: msg="{{ updates.results }}"
+
+- hosts: docker
+  serial: 5
+  tasks:
+    #- name: Check if docker service installed
+    #  stat:
+    #    path: /usr/lib/systemd/system/docker.service
+    #  register: docker_service
+    - name: get docker service file contents
+      shell: cat /usr/lib/systemd/system/docker.service
+      register: docker_service
+      
+    - name: Set Docker Service to have custom home directory
+      shell: sed -i /'^ExecStart/s+$+ -g /opt/installs/docker +' /usr/lib/systemd/system/docker.service
+      when: docker_service.stdout.find('-g /opt/installs/docker') == -1
+      
+    - name: reload daemon
+      shell: systemctl daemon-reload
+      when: docker_service.stdout.find('-g /opt/installs/docker') == -1
+    
+    - name: Restart Docker for home directory change to apply
+      service:
+        name: docker
+        state: restarted
+      when: docker_service.stdout.find('-g /opt/installs/docker') == -1

@@ -1,0 +1,9 @@
+- hosts: all
+  serial: 5
+  tasks:
+    #List all user that have logged in the last 364 days
+    - name: Users that logged in last 364 days
+      shell: lastlog -t 364
+      register: users
+    - name: Last Logged in User Results
+      debug: msg="{{ users.stdout }}"
